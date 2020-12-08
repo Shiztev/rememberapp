@@ -6,11 +6,19 @@ can make a note in just a few seconds.
 @author Stevie Alvarez
 '''
 
-# Create a note: UI with a few text fields
+# Basic note functions - getopt module?
 
-# Store a note: in a file/SQL(?)
+    # Create a note: UI with a few text fields
+        # possible text fields: subject, time, location, people, items, additional notes
 
-# 'Read' stored notes: display the notes to review and remember.
+    # Store a note: in a file/SQL(?)
+        # could store in one file, each line being one note
+
+
+# Access note functions - getopt module?
+
+    # 'Read' stored notes: display the notes to review and remember.
+
     # Edit stored notes: alter the content of a note
 
-# Delete stored notes: remove notes from storage
+    # Delete stored notes: remove notes from storage
