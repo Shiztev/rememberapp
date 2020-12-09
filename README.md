@@ -1,3 +1,3 @@
 # rememberapp
 # Notes/Reminder application. Store minimal information to be easily accessed later.
-# Keep the date and time, have multiple, short fields to fill out. 
+# Multiple short fields to fill out, such as time, location, subject, etc.
