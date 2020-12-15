@@ -4,6 +4,47 @@ Note object module
 @author Stevie Alvarez
 '''
 
+
+class NoteIterator:
+    '''
+    Allows Note objects to be iterated through
+    '''
+    __slots__ = ['__note', '__index', '__max']
+
+    def __init__(self, note):
+        """
+        Constructor
+        """
+        # index order: sub -> time -> date -> loc -> people -> items -> addit
+        self.__note = note
+        self.__index = 0
+        self.__max = len(self.__note.get_sub()) + len(self.__note.get_time()) + len(self.__note.get_date()) + len(self.__note.get_location()) + len(self.__note.get_people()) + len(self.__note.get_items()) + len(self.__note.get_additional())
+
+
+    def __next__(self):
+        """
+        Retrieves next 'item' in Note
+        """
+        if self.__index < self.__max:
+            self.__index += 1
+            if self.__index < len(self.__note.get_sub()):
+                return self.__note.get_sub()[self.__index - 1]
+            elif self.__index < len(self.__note.get_sub()) + len(self.__note.get_time()):
+                return self.__note.get_time()[self.__index - 1 - len(self.__note.get_sub())]
+            elif self.__index < len(self.__note.get_sub()) + len(self.__note.get_time()) + len(self.__note.get_date()):
+                return self.__note.get_date()[self.__index - 1 - (len(self.__note.get_sub()) + len(self.__note.get_time()))]
+            elif self.__index < len(self.__note.get_sub()) + len(self.__note.get_time()) + len(self.__note.get_date()) + len(self.__note.get_location()):
+                return self.__note.get_location()[self.__index - 1 - (len(self.__note.get_sub()) + len(self.__note.get_time()) + len(self.__note.get_date()))]
+            elif self.__index < len(self.__note.get_sub()) + len(self.__note.get_time()) + len(self.__note.get_date()) + len(self.__note.get_location()) + len(self.__note.get_people()):
+                return self.__note.get_people()[self.__index - 1 - (len(self.__note.get_sub()) + len(self.__note.get_time()) + len(self.__note.get_date()) + len(self.__note.get_location()))]
+            elif self.__index < len(self.__note.get_sub()) + len(self.__note.get_time()) + len(self.__note.get_date()) + len(self.__note.get_location()) + len(self.__note.get_people()) + len(self.__note.get_items()):
+                return self.__note.get_items()[self.__index - 1 - (len(self.__note.get_sub()) + len(self.__note.get_time()) + len(self.__note.get_date()) + len(self.__note.get_location()) + len(self.__note.get_people()))]
+            else:
+                return self.__note.get_additional()[self.__index - 1 - (len(self.__note.get_sub()) + len(self.__note.get_time()) + len(self.__note.get_date()) + len(self.__note.get_location()) + len(self.__note.get_people()) + len(self.__note.get_items()))]
+
+        raise StopIteration
+
+
 class Note:
     '''
     A note with key features of a subject
@@ -26,13 +67,40 @@ class Note:
         """
         Constructor
         """
-        self.__sub = None
-        self.__time = None
-        self.__date = None
-        self.__location = None
-        self.__people = None
-        self.__items = None
-        self.__additional = None
+        self.__sub = ""  # None
+        self.__time = ""  # None
+        self.__date = ""  # None
+        self.__location = ""  # None
+        self.__people = ""  # None
+        self.__items = ""  # None
+        self.__additional = ""  # None
+
+
+    def get_sub(self):
+        return self.__sub
+
+
+    def get_time(self):
+        return self.__time
+
+
+    def get_date(self):
+        return self.__date
+
+
+    def get_location(self):
+        return self.__location
+
+
+    def get_people(self):
+        return self.__people
+
+
+    def get_items(self):
+        return self.__items
+
+    def get_additional(self):
+        return self.__additional
 
 
     def set_sub(self, a_sub):
@@ -55,6 +123,7 @@ class Note:
             raise ValueError("Time must be text!")
         else:
             self.__time = a_time
+
 
     def set_date(self, a_date):
         """
@@ -120,7 +189,7 @@ class Note:
         pass
 
 
-    def readin_note(self):
+    def read_in_note(self):
         """
         Create note from previously stored note
         """
@@ -138,7 +207,66 @@ class Note:
         """
         Hash
         """
-        ord(self.__sub[0])
+        ((ord(self.__sub[0]) * 31) + len(self.__sub))
 
 
+    def __contain__(self, item):
+        """
+        Contain - in, not in
+        """
+        if item in self.__sub:
+            return True
 
+        if item in self.__time:
+            return True
+
+        if item in self.__people:
+            return True
+
+        if item in self.__location:
+            return True
+
+        if item in self.__items:
+            return True
+
+        if item in self.__additional:
+            return True
+
+        """
+        for _ in self.__sub:
+            if _ == item:
+                return True
+
+        for _ in self.__time:
+            if _ == item:
+                return True
+
+        for _ in self.__people:
+            if _ == item:
+                return True
+
+        for _ in self.__location:
+            if _ == item:
+                return True
+
+        for _ in self.__people:
+            if _ == item:
+                return True
+
+        for _ in self.__items:
+            if _ == item:
+                return True
+
+        for _ in self.__additional:
+            if _ == item:
+                return True
+        """
+
+        return False
+
+
+    def __iter__(self):
+        """
+        Returns iterator
+        """
+        return NoteIterator(self)
