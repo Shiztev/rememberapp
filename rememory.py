@@ -7,7 +7,7 @@ can make a note in just a few seconds.
 '''
 
 from notes import *  # create standardized note
-import node_queue  # store notes
+import node_queue  # store notes 
 
 class Notebook(node_queue.Queue):
     '''
@@ -26,6 +26,14 @@ class Notebook(node_queue.Queue):
         return a dictionary version in addition
         """
         d = dict()
+        with open(filename) as f:
+            for line in f:
+                records = line.split("\'\', ")
+                # records have length of 7:
+                # 0 - Subject, 1 - Time, 2 - Date, 3 - Location, 4 - People, 5 - Items, 6 - Additional
+
+                
+
 
 
 # Basic note functions - getopt module?
