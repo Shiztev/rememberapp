@@ -6,6 +6,8 @@ Test module for notes
 
 
 import notes
+import rememory
+import io
 
 
 def test_contain():
@@ -31,17 +33,17 @@ def test_contain():
     assert actual_2 == True
 
 
-def test_find():
+def test_create(monkeypatch):
     """
     """
     # setup
-    n = notes.Note()
-    n.set_sub("Testing")
-    n.set_location("More tests")
-    n.set_additional("\"Some major tests going down\"")
+    book = rememory.Notebook()
+    monkeypatch.setattr('sys.stdin', io.StringIO("This\nIs\nA\nTest\nThe last field\nWill be blank\n \n"))
+    expected = "Subject: " + "This" + "\n\tTime: " + "Is" + "\n\tDate: " + "A" + "\n\tLocation: " + "Test" + "\n\tPeople: " + "The last field" + "\n\tItems: " + "Will be blank" + "\n\tAdditional:  "
 
     # invoke
-    #actual = n.find("test")
+    book.new_note()
+    actual = str(book.peek())
 
     # analyze
-    pass # UNSURE IF FIND METHOD IS NECESSARY
+    assert expected == actual
