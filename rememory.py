@@ -73,4 +73,8 @@ class Notebook(node_queue.Queue):
 
 
 # Main function, utilize sys to gather and process args/opts
-    # 
+    # try
+        # verify sys.argv[1] is an option
+        # get the argument for the option: sys.argv[2]
+        # execuite the function/method with respect to the option
+    # except, handel errors - raise errors when possible
