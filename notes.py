@@ -5,6 +5,9 @@ Note object module
 '''
 
 
+FIELDS = ["Subject", "Time", "Date", "Date", "Location", "People", "Items", "Additional Information"]
+
+
 class NoteIterator:
     '''
     Allows Note objects to be iterated through
@@ -189,25 +192,43 @@ class Note:
         pass
 
 
-    def read_in_note(self):
+    def __fill(self, sub, time, date, loc, people, items, addit):
+        # 0 - Subject, 1 - Time, 2 - Date, 3 - Location, 4 - People, 5 - Items, 6 - Additional
         """
-        Create note from previously stored note
+        Fill note with respect to arguments
         """
-        pass
+        self.__sub = sub
+        self.__time = time
+        self.__date = date
+        self.__location = loc
+        self.__people = people
+        self.__items = items
+        self.__additional = addit
+
+    
+    def read_in_note(self, sub, time, date, loc, people, items, addit):
+        """
+        Create note with respect to arguments, called when filling in from file
+        """
+        self.__fill(self, sub, time, date, loc, people, items, addit)
 
 
     def create_note(self):
         """
         Create note from user input/options
         """
-        pass
+        a = []
+        for f in FIELDS:
+            a.append(input("Enter " + f + ": "))
+        
+        self.__fill(a[0], a[1], a[2], a[3], a[4], a[5], a[6])
 
 
     def __hash__(self):
         """
         Hash
         """
-        ((ord(self.__sub[0]) * 31) + len(self.__sub))
+        return ((ord(self.__sub[0]) * 31) + len(self.__sub))
 
 
     def __contain__(self, item):
@@ -231,36 +252,6 @@ class Note:
 
         if item in self.__additional:
             return True
-
-        """
-        for _ in self.__sub:
-            if _ == item:
-                return True
-
-        for _ in self.__time:
-            if _ == item:
-                return True
-
-        for _ in self.__people:
-            if _ == item:
-                return True
-
-        for _ in self.__location:
-            if _ == item:
-                return True
-
-        for _ in self.__people:
-            if _ == item:
-                return True
-
-        for _ in self.__items:
-            if _ == item:
-                return True
-
-        for _ in self.__additional:
-            if _ == item:
-                return True
-        """
 
         return False
 
