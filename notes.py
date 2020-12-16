@@ -189,7 +189,7 @@ class Note:
         """
         String
         """
-        pass
+        return "Subject: " + self.__sub + "\n\tTime: " + self.__time + "\n\tDate: " + self.__date + "\n\tLocation: " + self.__location + "\n\tPeople: " + self.__people + "\n\tItems: " + self.__items + "\n\tAdditional: " + self.__additional
 
 
     def __fill(self, sub, time, date, loc, people, items, addit):
@@ -217,6 +217,7 @@ class Note:
         """
         Create note from user input/options
         """
+        print("Fill out each field of the note, press enter when done.\nIf field should be blank, simply press enter.")
         a = []
         for f in FIELDS:
             a.append(input("Enter " + f + ": "))
