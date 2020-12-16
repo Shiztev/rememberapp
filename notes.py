@@ -5,7 +5,7 @@ Note object module
 '''
 
 
-FIELDS = ["Subject", "Time", "Date", "Date", "Location", "People", "Items", "Additional Information"]
+FIELDS = ["Subject", "Time", "Date", "Location", "People", "Items", "Additional Information"]
 
 
 class NoteIterator:
@@ -220,7 +220,8 @@ class Note:
         print("Fill out each field of the note, press enter when done.\nIf field should be blank, simply press enter.")
         a = []
         for f in FIELDS:
-            a.append(input("Enter " + f + ": "))
+            user_input = input("Enter " + f + ": ")
+            a.append(user_input)
         
         self.__fill(a[0], a[1], a[2], a[3], a[4], a[5], a[6])
 
