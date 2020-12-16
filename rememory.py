@@ -8,11 +8,13 @@ can make a note in just a few seconds.
 
 from notes import *  # create standardized note
 import node_queue  # store notes 
+import sys  # sys.argv to gather arguments/options from command line
 
 class Notebook(node_queue.Queue):
     '''
     A subclass of node_queue, handels notes
     '''
+
     def __init__(self):
         """
         Constructor
@@ -22,18 +24,33 @@ class Notebook(node_queue.Queue):
 
     def fill(self, filename):
         """
-        Fill the notebook with recorded notes from file filename, 
-        return a dictionary version in addition
+        Fill the notebook with recorded notes from file filename
         """
-        d = dict()
         with open(filename) as f:
             for line in f:
-                records = line.split("\'\', ")
+                r = line.split("\'\', ")  # records
                 # records have length of 7:
                 # 0 - Subject, 1 - Time, 2 - Date, 3 - Location, 4 - People, 5 - Items, 6 - Additional
+                n = Note()
+                n.read_in_note(r[0], r[1], r[2], r[3], r[4], r[5], r[6])
+                self.enqueue(n)
 
-                
 
+    def new_note(self):
+        """
+        Make a new note and enqueue it
+        """
+        n = Note()
+        n.create_note()
+        self.enqueue(n)
+
+
+    def __save(self):
+        """
+        Save the current queue of notes
+        """
+        # open the file with writing perms (APPEND), not standard reading
+        pass
 
 
 # Basic note functions - getopt module?
@@ -52,3 +69,8 @@ class Notebook(node_queue.Queue):
     # Edit stored notes: alter the content of a note
 
     # Delete stored notes: remove notes from storage
+
+
+
+# Main function, utilize sys to gather and process args/opts
+    # 
