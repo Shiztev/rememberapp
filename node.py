@@ -1,8 +1,7 @@
 """
-Node class used to implement noce-based data structures.
-
-@author GCCIS Faculty
+A copy of the node module from SWEN 123
 """
+
 class Node:
     __slots__ = ["__value", "__next"]
 

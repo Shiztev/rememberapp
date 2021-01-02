@@ -1,8 +1,7 @@
 """
-Provides a node-based implementation of a stack data structure.
-
-@author GCCIS Faculty
+A copy of the node stack module from SWEN 123
 """
+
 import node
 
 class Stack:

@@ -1,3 +1,7 @@
+"""
+A copy of the node queue module from SWEN 123
+"""
+
 import node
 
 class Queue:
