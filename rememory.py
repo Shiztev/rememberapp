@@ -10,6 +10,8 @@ from notes import *  # create standardized note
 import node_queue  # store notes 
 import sys  # sys.argv to gather arguments/options from command line
 
+FILENAME = "notebook"  # standardized storage filename 
+
 class Notebook(node_queue.Queue):
     '''
     A subclass of node_queue, handels notes
@@ -44,12 +46,56 @@ class Notebook(node_queue.Queue):
         n.create_note()
         self.enqueue(n)
 
+    
+    def __read(self):  # UNTESTED <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+        """
+        Read the current save file
+        """
+        with open(FILENAME, "r") as f:
+            for line in f:
+                print(line)
+                if f.tell() % 10 == 0:
+                    _ = input("Enter integer index, or (y/n) to continue.")
+                    if "n" in _:
+                        break
+                    elif "y" in _:
+                        continue
+                    else:
+                        try:
+                            _ = int(_)
+                            break
+                        except:
+                            print("Improper input, specify yes or no to continue or not, or enter note index.")
 
-    def __save(self):
+        return _
+                        
+
+    def __append(self):
         """
-        Save the current queue of notes
+        Save notes to end of file
         """
-        # open the file with writing perms (APPEND), not standard reading
+        with open(FILENAME, "a") as f:  # append to storage file
+            while not self.is_empty():  # dequeue each note and write to file
+                f.write(repr(self.dequeue()))
+
+    
+    def __update(self):  # IMPLIMENT <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+        """
+        Save an updated version of a note
+        """
+        # if updating, -u will be used as an option.
+        # Need to display all notes (or some notes if there are many, and have the option to print more)
+        # Index notes printed to quickly determine which to edit
+        # When done, call this method to update based off the index
+        pass
+
+
+    def __save(self):  # APPEND WORKS, NEED OTHERS
+        """
+        Save the current queue of notes to the standard storage file
+
+        UPDATE TO CALL METHODS TO UPDATE NOTES AND APPEND NOTES
+        """
         pass
 
 
@@ -66,6 +112,8 @@ class Notebook(node_queue.Queue):
 
     # 'Read' stored notes: display the notes to review and remember.
 
+        # Order notes by time and date - the sooner, the higher 'ranked' (1/1/01 > 1/2/01)
+
     # Edit stored notes: alter the content of a note
 
     # Delete stored notes: remove notes from storage
@@ -73,8 +121,22 @@ class Notebook(node_queue.Queue):
 
 
 # Main function, utilize sys to gather and process args/opts
+def main():
+    """
+    Currently using for manual tests
+    """
     # try
         # verify sys.argv[1] is an option
         # get the argument for the option: sys.argv[2]
         # execuite the function/method with respect to the option
     # except, handel errors - raise errors when possible
+    n = Notebook()
+    n.new_note()
+    n.new_note()
+    n.new_note()
+    n.save()
+
+
+
+if __name__ == "__main__":
+    main()

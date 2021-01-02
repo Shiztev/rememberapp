@@ -182,7 +182,8 @@ class Note:
         """
         Representation
         """
-        pass
+        # 0 - Subject, 1 - Time, 2 - Date, 3 - Location, 4 - People, 5 - Items, 6 - Additional
+        return (self.__sub + "'', " + self.__time + "'', " + self.__date + "'', " + self.__location + "'', " + self.__people + "'', " + self.__items + "'', " + self.__additional + "\n")
 
 
     def __str__(self):
