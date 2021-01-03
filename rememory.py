@@ -24,6 +24,14 @@ class Notebook(node_queue.Queue):
         super().__init__()  # Parent class init
 
 
+    def __order(self):
+        """
+        Order queue with respect to note comparators  
+        # NEED TO IMPLIMENT NOTE COMPARATORS FIRST, BASED OFF TIME/DATE(?)
+        """
+        pass # <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+
     def fill(self, filename):
         """
         Fill the notebook with recorded notes from file filename
@@ -48,6 +56,7 @@ class Notebook(node_queue.Queue):
 
     
     def __read(self):  # UNTESTED <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+        # >>>>>>>>>>>>>>>>>>>>>>DO YOU NEED THIS, WHAT IS IT FOR...?<<<<<<<<<<<<<<<<
         """
         Read the current save file
         """
@@ -68,26 +77,58 @@ class Notebook(node_queue.Queue):
                             print("Improper input, specify yes or no to continue or not, or enter note index.")
 
         return _
-                        
+
+
+    def __edit(self, a_note):
+        """
+        Edit provided note
+        """
+        if type(a_note) != Note:
+            raise TypeError("Attempting to edit something other than a note!\nYou really shouldn't be seeing this message....")
+        print("Which field would you like to edit?")
+
 
     def __append(self):
         """
         Save notes to end of file
+
+            Option:
+                -a
         """
+        # single update implimentation
         with open(FILENAME, "a") as f:  # append to storage file
-            while not self.is_empty():  # dequeue each note and write to file
-                f.write(repr(self.dequeue()))
+            f.write(repr(self.dequeue()))
 
     
     def __update(self):  # IMPLIMENT <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
         """
         Save an updated version of a note
+
+            Option:
+                -u
         """
-        # if updating, -u will be used as an option.
-        # Need to display all notes (or some notes if there are many, and have the option to print more)
-        # Index notes printed to quickly determine which to edit
-        # When done, call this method to update based off the index
-        pass
+        # dequeue and enqueue front note, display new front
+        # user determines if note should be updated
+        print("Enter any character(s) when you reach the note you want to edit.")
+        print("Otherwise, leave your input empty.")
+        print("TO EXIT, enter in all caps: EXIT")
+
+        curr = self.dequeue()
+        u = input(str(curr))
+        while u.strip() == "":
+            
+            self.enqueue(curr)
+            curr = self.dequeue()
+            u = input(str(curr))
+
+        if u == "EXIT":
+            return 0  # user exit
+
+        edited = self.__edit(curr)
+            
+
+        
+        
 
 
     def __save(self):  # APPEND WORKS, NEED OTHERS
@@ -95,6 +136,9 @@ class Notebook(node_queue.Queue):
         Save the current queue of notes to the standard storage file
 
         UPDATE TO CALL METHODS TO UPDATE NOTES AND APPEND NOTES
+
+            Option(?):
+                -s  # maybe don't have an option to save and just do automatically?
         """
         pass
 
@@ -125,17 +169,20 @@ def main():
     """
     Currently using for manual tests
     """
+
     # try
         # verify sys.argv[1] is an option
         # get the argument for the option: sys.argv[2]
         # execuite the function/method with respect to the option
     # except, handel errors - raise errors when possible
+
+    '''
     n = Notebook()
     n.new_note()
     n.new_note()
     n.new_note()
     n.save()
-
+    '''
 
 
 if __name__ == "__main__":
