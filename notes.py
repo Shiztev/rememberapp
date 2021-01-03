@@ -180,7 +180,7 @@ class Note:
 
     def __repr__(self):
         """
-        Representation
+        Representation - primarily used for file storage
         """
         # 0 - Subject, 1 - Time, 2 - Date, 3 - Location, 4 - People, 5 - Items, 6 - Additional
         return (self.__sub + "'', " + self.__time + "'', " + self.__date + "'', " + self.__location + "'', " + self.__people + "'', " + self.__items + "'', " + self.__additional + "\n")
@@ -264,3 +264,13 @@ class Note:
         Returns iterator
         """
         return NoteIterator(self)
+
+
+    def __eq__(self, other):
+        """
+        Returns comparison bool
+        """
+        if type(self) == type(other):
+            return self == other
+
+        return False
