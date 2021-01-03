@@ -47,3 +47,16 @@ def test_create(monkeypatch):
 
     # analyze
     assert expected == actual
+
+
+def test_type():
+    """
+    """
+    # setup
+    n = notes.Note()
+    n.set_sub("sub")
+
+    # invoke
+
+    # analyze
+    assert notes.Note == type(n)
