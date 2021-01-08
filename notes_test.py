@@ -59,3 +59,64 @@ def test_type():
 
     # analyze
     assert notes.Note == type(n)
+
+
+def test_eq(monkeypatch):
+    """
+    """
+    # setup
+    n1 = notes.Note()
+    n2 = notes.Note()
+    n3 = notes.Note()
+    monkeypatch.setattr('sys.stdin', io.StringIO("Test Pass\n2:00pm\n1/1/2005\n\n\nSome Stuff\n\nTest Pass\n2:00pm\n1/1/2005\n\n\nSome Stuff\n\nTest Fail\n3:00pm\n\nSomewhere\n\nSome Stuff\n\n"))
+    # invoke
+    n1.create_note()
+    n2.create_note()
+    n3.create_note()
+
+    # analyze
+    assert n1 == n2
+    assert n1 != n3
+
+
+def test_lt(monkeypatch):
+    """
+    """
+    # setup
+    n1 = notes.Note()
+    n2 = notes.Note()
+    n3 = notes.Note()
+    monkeypatch.setattr('sys.stdin', io.StringIO("Test Pass\n2:00pm\n1/1/2005\n\n\nSome Stuff\n\nTest Pass\n2:00pm\n1/1/2005\n\n\nSome Stuff\n\nTest Fail\n3:00pm\n\nSomewhere\n\nSome Stuff\n\n"))
+    # invoke
+    n1.create_note()
+    n2.create_note()
+    n3.create_note()
+
+    # analyze
+    assert n1 == n2
+    assert n1 != n3
+
+
+def test_gt(monkeypatch):
+    """
+    """
+    # setup
+    n1 = notes.Note()
+    n2 = notes.Note()
+    n3 = notes.Note()
+    monkeypatch.setattr('sys.stdin', io.StringIO("Test 1\n2:00pm\n1/2/2005\n\n\nSome Stuff\n\nTest 2\n2:00pm\n1/1/2005\n\n\nSome Stuff\n\nTest 3\n3:00pm\n\nSomewhere\n\nSome Stuff\n\n"))
+    # invoke
+    n1.create_note()
+    n2.create_note()
+    n3.create_note()
+
+    # analyze
+    assert n1 < n2
+    assert n3 > n2
+
+
+
+
+
+
+# 0 - Subject, 1 - Time, 2 - Date, 3 - Location, 4 - People, 5 - Items, 6 - Additional
