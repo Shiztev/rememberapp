@@ -8,8 +8,9 @@ can make a note in just a few seconds.
 
 from notes import *  # create standardized note
 import node_queue  # store notes 
-import sys  # sys.argv to gather arguments/options from command line
 import inquirer  # CLI navigation
+import sys  # sys.argv to gather arguments/options from command line
+import getopt  # parse arguments from command line input
 
 FILENAME = "notebook"  # standardized storage filename 
 ATTRIBUTES = ["Subject", "Time", "Date", "Location", "People", "Items", "Additional Information"]
@@ -58,29 +59,63 @@ class Notebook(node_queue.Queue):
         n.create_note()
         self.enqueue(n)
 
-    
-    def __read(self):  # UNTESTED <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-        # >>>>>>>>>>>>>>>>>>>>>>DO YOU NEED THIS, WHAT IS IT FOR...?<<<<<<<<<<<<<<<<
-        """
-        Read the current save file
-        """
-        with open(FILENAME, "r") as f:
-            for line in f:
-                print(line)
-                if f.tell() % 10 == 0:
-                    _ = input("Enter integer index, or (y/n) to continue.")
-                    if "n" in _:
-                        break
-                    elif "y" in _:
-                        continue
-                    else:
-                        try:
-                            _ = int(_)
-                            break
-                        except:
-                            print("Improper input, specify yes or no to continue or not, or enter note index.")
 
-        return _
+    def __search(self, action, q):
+        """
+        Search for a note and pass it to the specified method
+
+            Parameters:
+                action: method to use with selected note
+                q: question prompt with respect to action method
+        """
+        pass
+        # use content from update method
+
+        moderator = self.size()
+        factor = 5
+        next_prompt = "Next 5..."
+
+        while True:  # repeat untill note/quit is selected
+
+            if moderator <= 5:
+                factor = moderator
+                next_prompt = "Return to top"
+            else:
+                moderator -= 5
+
+            options = []
+            for _ in range(factor):
+                i = self.dequeue()
+                options.append(i)
+                self.enqueue(i)
+            
+            subjects = [n.get_sub() for n in options]
+            subjects.append("EXIT"); subjects.append(next_prompt);
+                
+            questions = [
+                inquirer.List(
+                    'note',
+                    message=q,  # CHANGE BASED ON METHOD BEING CALLED
+                    choices=subjects)
+            ]
+
+            answers = inquirer.prompt(questions)
+
+            if answers['note'] == "EXIT":
+                return
+
+            elif answers['note'] == "Next 5...":
+                continue
+
+            elif answers['note'] == "Return to top":
+                factor = 5
+                moderator = self.size()
+
+            else:
+                break
+        
+        i = subjects.index(answers['note'])
+        action(options[i])
 
 
     def __shift(self, a_note):
@@ -142,65 +177,6 @@ class Notebook(node_queue.Queue):
         with open(FILENAME, "a") as f:  # append to storage file
             f.write(repr(self.dequeue()))
 
-
-    def __search(self, action, q):
-        """
-        Search for a note and pass it to the specified method
-
-            Parameters:
-                action: method to use with selected note
-                q: question prompt with respect to action method
-        """
-        pass
-        # use content from update method
-
-        moderator = self.size()
-        factor = 5
-        next_prompt = "Next 5..."
-
-        while True:  # repeat untill note/quit is selected
-
-            if moderator <= 5:
-                factor = moderator
-                next_prompt = "Return to top"
-            else:
-                moderator -= 5
-
-            options = []
-            for _ in range(factor):
-                i = self.dequeue()
-                options.append(i)
-                self.enqueue(i)
-            
-            subjects = [n.get_sub() for n in options]
-            subjects.append("EXIT"); subjects.append(next_prompt);
-                
-            questions = [
-                inquirer.List(
-                    'note',
-                    message=q,  # CHANGE BASED ON METHOD BEING CALLED
-                    choices=subjects)
-            ]
-
-            answers = inquirer.prompt(questions)
-
-            if answers['note'] == "EXIT":
-                return
-
-            elif answers['note'] == "Next 5...":
-                continue
-
-            elif answers['note'] == "Return to top":
-                factor = 5
-                moderator = self.size()
-
-            else:
-                break
-        
-        i = subjects.index(answers['note'])
-        action(options[i])
-
-
     
     def update(self):  # IMPLIMENT and privitize<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
         """
@@ -223,6 +199,13 @@ class Notebook(node_queue.Queue):
                 -d
         """
         self.__search(self.__remove, METHOD_QS[1])
+
+
+    def __read(self):
+        """
+        Display notes
+        """
+        pass
         
 
 
@@ -241,24 +224,12 @@ class Notebook(node_queue.Queue):
     
 
 
-# Basic note functions - getopt module?
-
-    # Create a note: UI(?) with a few text fields (Start with CLI)
-        # possible text fields: subject, time, location, people, items, additional notes
-
-    # Store a note: in a file/SQL(?)
-        # could store in one file, each line being one note
-
-
 # Access note functions - getopt module?
 
     # 'Read' stored notes: display the notes to review and remember.
 
         # Order notes by time and date - the sooner, the higher 'ranked' (1/1/01 > 1/2/01)
 
-    # Edit stored notes: alter the content of a note
-
-    # Delete stored notes: remove notes from storage
 
 
 
@@ -267,6 +238,8 @@ def main():
     """
     Currently using for manual tests
     """
+
+    # After init implimentation w/ file storage, look into mysql storage adaption?
 
     # try
         # verify sys.argv[1] is an option
