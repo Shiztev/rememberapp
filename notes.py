@@ -6,6 +6,124 @@ Note object module
 
 
 FIELDS = ["Subject", "Time", "Date", "Location", "People", "Items", "Additional Information"]
+MONTHS = ["January", "Febuary", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"]
+
+def _date_parser(date):
+    """
+    Parses date and ensures numerical values are used for proportional measuring
+
+        Parameters:
+            date: a date in m/d/y or m, d, y format
+    """
+    date = date.strip()
+    if date == "":
+        return [0, 0, 0]
+    elif "/" in date:
+        date = date.split("/")
+    elif ", " in date:
+        date.split(", ")
+    else:
+        raise ValueError("Improper date format!")
+
+    # day and year should already be numeric
+    try:
+        d = int(date[1])
+    except:
+        raise ValueError("Date day is not numeric!")
+
+    try:
+        y = int(date[2])
+    except:
+        raise ValueError("Date year is not numeric!")
+
+    # check if month needs to be converted
+    try:
+        m = int(date[0])
+    except:
+        for i in range(len(MONTHS)):
+            if date[0] in MONTHS[i]:
+                m = i + 1
+
+    return [str(m), str(d), str(y)]
+
+
+class Time:
+    '''
+    Time class, ease of sorting notes
+    '''
+    __slots__ = ['__time', '__m', '__hour', '__minutes']
+    def __init__(self, a_time):
+        """
+        Constructor
+        """
+        self.__time = a_time
+        if a_time.strip() == "":
+            self.__m = None
+            self.__hour = None
+            self.__minutes = None
+        else:
+            m = a_time[-2:len(a_time)]  # am/pm
+            if m == "am":
+                m = 0
+            elif m == "pm":
+                m = 1
+            else:
+                raise ValueError("Improper time format! Neither AM nor PM was specified.")
+            a_time = a_time.strip().split(":")
+            self.__hour = int(a_time[0])
+            self.__minutes = int(a_time[1][:2])
+
+
+    def get_m(self):
+        return self.__m
+
+    
+    def get_hour(self):
+        return self.__hour
+
+
+    def get_min(self):
+        return self.__minutes
+
+
+    def __lt__(self, other):
+        """
+        """
+        if type(self) == type(other):
+            if self.__m == other.get_m():
+                if self.__hour == other.get_hour():
+                    return self.__minutes < other.get_min()
+                return self.__hour < other.get_hour()
+
+            elif other.get_m() == None:
+                return False
+
+            elif self.__m == None:
+                return True
+
+            return self.__m < other.get_m()
+
+        return False
+
+
+    def __gt__(self, other):
+        """
+        """
+        if type(self) == type(other):
+            if self.__m == other.get_m():
+                if self.__hour == other.get_hour():
+                    return self.__minutes > other.get_min()
+                return self.__hour > other.get_hour()
+
+            elif other.get_m() == None:
+                return True
+
+            elif self.__m == None:
+                return False
+
+            return self.__m > other.get_m()
+
+        return False
 
 
 class NoteIterator:
@@ -290,12 +408,63 @@ class Note:
         return NoteIterator(self)
 
 
+    """
+    Bool comparisons done with respect to time and date. Notes ranked 
+    based on time of occurance
+    """
+
     def __eq__(self, other):
         """
-        Returns comparison bool
+        Returns equal comparison bool
         """
         if type(self) == type(other):
-            return self == other
+            return (_date_parser(self.__date) == _date_parser(other.get_date())) and (self.__time == other.get_time())
+                
+        return False
+
+
+    def __lt__(self, other):
+        """
+        Returns less than comparison bool
+        """
+        if type(self) == type(other):
+            sd = _date_parser(self.__date)
+            od = _date_parser(other.get_date())
+
+            if sd == od:
+                st = Time(self.__time)
+                ot = Time(other.get_time())
+                return st < ot
+            
+            # RETURN BASED ON YEAR, MONTH, DATE
+            elif sd[2] == od[2]:
+                elif sd[1] == od[1]:
+                    return sd[0] < od[0]
+                return sd[1] < od[1]
+            return sd[2] < od[2]
+
+        return False
+
+
+    def __gt__(self, other):
+        """
+        Returns greater than comparison bool
+        """
+        if type(self) == type(other):
+            sd = _date_parser(self.__date)
+            od = _date_parser(other.get_date())
+
+            if sd == od:
+                st = Time(self.__time)
+                ot = Time(other.get_time())
+                return st > ot
+            
+            # RETURN BASED ON YEAR, MONTH, DATE
+            elif sd[2] == od[2]:
+                elif sd[1] == od[1]:
+                    return sd[0] > od[0]
+                return sd[1] > od[1]
+            return sd[2] > od[2]
 
         return False
 
