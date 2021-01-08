@@ -9,8 +9,11 @@ can make a note in just a few seconds.
 from notes import *  # create standardized note
 import node_queue  # store notes 
 import sys  # sys.argv to gather arguments/options from command line
+import inquirer  # CLI navigation
 
 FILENAME = "notebook"  # standardized storage filename 
+ATTRIBUTES = ["Subject", "Time", "Date", "Location", "People", "Items", "Additional Information"]
+METHOD_QS = ["Which note would you like to edit?", "Which note would you like to delete?"]
 
 class Notebook(node_queue.Queue):
     '''
@@ -32,13 +35,14 @@ class Notebook(node_queue.Queue):
         pass # <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
 
-    def fill(self, filename):
+    def fill(self, filename=FILENAME):
         """
         Fill the notebook with recorded notes from file filename
         """
         with open(filename) as f:
             for line in f:
                 r = line.split("\'\', ")  # records
+                r.pop(-1)
                 # records have length of 7:
                 # 0 - Subject, 1 - Time, 2 - Date, 3 - Location, 4 - People, 5 - Items, 6 - Additional
                 n = Note()
@@ -79,18 +83,57 @@ class Notebook(node_queue.Queue):
         return _
 
 
+    def __shift(self, a_note):
+        """
+        Shift queue until a_note is at the front
+        """
+        while self.peek() != a_note:
+            _ = self.dequeue()
+            self.enqueue(_)
+
+
     def __edit(self, a_note):
         """
-        Edit provided note
+        Edit provided note, utilizes inquirer for attribute selection
         """
         if type(a_note) != Note:
             raise TypeError("Attempting to edit something other than a note!\nYou really shouldn't be seeing this message....")
-        print("Which field would you like to edit?")
+       
+        while True:  # allow user to edit as many attributes on the note as they want
+            
+            attribs = a_note.make_list()
+            attribs.append("EXIT")
+            questions = [
+                inquirer.List(
+                    'attrib',
+                    message="Which field would you like to edit?",
+                    choices=attribs)
+            ]
+
+            answers = inquirer.prompt(questions)
+            
+            if answers['attrib'] == "EXIT":
+                break
+            else:
+                i = attribs.index(answers['attrib'])
+                a_note.edit(ATTRIBUTES[i])
+
+
+    def __remove(self, a_note):
+        """
+        Remove specified note from queue
+
+            Returns:
+                note specified to be removed from queue
+        """
+        self.__shift(a_note)
+        _ = self.dequeue()
+        return _
 
 
     def __append(self):
         """
-        Save notes to end of file
+        Save notes to end of file, 
 
             Option:
                 -a
@@ -99,35 +142,87 @@ class Notebook(node_queue.Queue):
         with open(FILENAME, "a") as f:  # append to storage file
             f.write(repr(self.dequeue()))
 
-    
-    def __update(self):  # IMPLIMENT <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+    def __search(self, action, q):
         """
-        Save an updated version of a note
+        Search for a note and pass it to the specified method
+
+            Parameters:
+                action: method to use with selected note
+                q: question prompt with respect to action method
+        """
+        pass
+        # use content from update method
+
+        moderator = self.size()
+        factor = 5
+        next_prompt = "Next 5..."
+
+        while True:  # repeat untill note/quit is selected
+
+            if moderator <= 5:
+                factor = moderator
+                next_prompt = "Return to top"
+            else:
+                moderator -= 5
+
+            options = []
+            for _ in range(factor):
+                i = self.dequeue()
+                options.append(i)
+                self.enqueue(i)
+            
+            subjects = [n.get_sub() for n in options]
+            subjects.append("EXIT"); subjects.append(next_prompt);
+                
+            questions = [
+                inquirer.List(
+                    'note',
+                    message=q,  # CHANGE BASED ON METHOD BEING CALLED
+                    choices=subjects)
+            ]
+
+            answers = inquirer.prompt(questions)
+
+            if answers['note'] == "EXIT":
+                return
+
+            elif answers['note'] == "Next 5...":
+                continue
+
+            elif answers['note'] == "Return to top":
+                factor = 5
+                moderator = self.size()
+
+            else:
+                break
+        
+        i = subjects.index(answers['note'])
+        action(options[i])
+
+
+    
+    def update(self):  # IMPLIMENT and privitize<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+        """
+        Save an updated version of a note, utilizes inquirer for note selection
 
             Option:
                 -u
         """
         # dequeue and enqueue front note, display new front
         # user determines if note should be updated
-        print("Enter any character(s) when you reach the note you want to edit.")
-        print("Otherwise, leave your input empty.")
-        print("TO EXIT, enter in all caps: EXIT")
-
-        curr = self.dequeue()
-        u = input(str(curr))
-        while u.strip() == "":
-            
-            self.enqueue(curr)
-            curr = self.dequeue()
-            u = input(str(curr))
-
-        if u == "EXIT":
-            return 0  # user exit
-
-        edited = self.__edit(curr)
+        self.__search(self.__edit, METHOD_QS[0])
+        # USE __search TO DETERMINE, NEED TO PASS METHOD 
             
 
-        
+    def delete(self):
+        """
+        Delete a note
+
+            Option:
+                -d
+        """
+        self.__search(self.__remove, METHOD_QS[1])
         
 
 
@@ -141,6 +236,9 @@ class Notebook(node_queue.Queue):
                 -s  # maybe don't have an option to save and just do automatically?
         """
         pass
+
+
+    
 
 
 # Basic note functions - getopt module?
@@ -176,13 +274,14 @@ def main():
         # execuite the function/method with respect to the option
     # except, handel errors - raise errors when possible
 
-    '''
+    
     n = Notebook()
-    n.new_note()
-    n.new_note()
-    n.new_note()
-    n.save()
-    '''
+    n.fill()
+    n.update()
+    n.delete()
+
+    
+
 
 
 if __name__ == "__main__":
