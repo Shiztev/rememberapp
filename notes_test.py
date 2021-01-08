@@ -9,7 +9,6 @@ import notes
 import rememory
 import io
 
-
 def test_contain():
     """
     """
