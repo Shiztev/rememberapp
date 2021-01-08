@@ -106,72 +106,93 @@ class Note:
         return self.__additional
 
 
-    def set_sub(self, a_sub):
+    def set_sub(self, a_sub=None):
         """
         Set subject
         """
+        if a_sub == None:
+            a_sub = input("Enter new subject: ")
+
         if type(a_sub) != str:
             raise ValueError("Subject must be described in text!")
-        elif len(a_sub) > 75:
+        elif len(a_sub) > 15:
             raise Warning("Subject text is long, this may affect legibility note.")
         else:
             self.__sub = a_sub
 
     
-    def set_time(self, a_time):
+    def set_time(self, a_time=None):
         """
         Set time
         """
+        if a_time == None:
+            a_time = input("Enter new time: ")
+
         if type(a_time) != str:
             raise ValueError("Time must be text!")
         else:
             self.__time = a_time
 
 
-    def set_date(self, a_date):
+    def set_date(self, a_date=None):
         """
         Set date
         """
+        if a_date == None:
+            a_date = input("Enter new date: ")
+            
         if type(a_dates) != str:
             raise ValueError("Date must be text!")
         else:
             self.__date = a_date
 
 
-    def set_location(self, a_loc):
+    def set_location(self, a_loc=None):
         """
         Set location
         """
+        if a_loc == None:
+            a_loc = input("Enter new location: ")
+            
         if type(a_loc) != str:
             raise ValueError("Location must be text!")
         else:
             self.__location = a_loc
 
 
-    def set_people(self, peoples):
+    def set_people(self, peoples=None):
         """
         Set people
         """
+        if peoples == None:
+            peoples = input("Enter new people: ")
+            
         if type(peoples) != str:
             raise ValueError("Peoples names must be text!")
         else:
             self.__people = peoples
 
     
-    def set_items(self, an_item):
+    def set_items(self, an_item=None):
         """
         Set items
         """
+        if an_item == None:
+            an_item = input("Enter new items: ")
+            
         if type(an_item) != str:
             raise ValueError("Items must be text!")
         else:
             self.__items = an_item
 
 
-    def set_additional(self, addit):
+    def set_additional(self, addit=None):
         """
         Set additional
         """
+        if addit == None:
+            addit = input("Enter new additional information: ")
+            
         if type(addit) != str:
             raise ValueError("Additional information must be text!")
         else:
@@ -183,7 +204,7 @@ class Note:
         Representation - primarily used for file storage
         """
         # 0 - Subject, 1 - Time, 2 - Date, 3 - Location, 4 - People, 5 - Items, 6 - Additional
-        return (self.__sub + "'', " + self.__time + "'', " + self.__date + "'', " + self.__location + "'', " + self.__people + "'', " + self.__items + "'', " + self.__additional + "\n")
+        return (self.__sub + "'', " + self.__time + "'', " + self.__date + "'', " + self.__location + "'', " + self.__people + "'', " + self.__items + "'', " + self.__additional + "'', " + "\n")
 
 
     def __str__(self):
@@ -211,7 +232,7 @@ class Note:
         """
         Create note with respect to arguments, called when filling in from file
         """
-        self.__fill(self, sub, time, date, loc, people, items, addit)
+        self.__fill(sub, time, date, loc, people, items, addit)
 
 
     def create_note(self):
@@ -244,6 +265,9 @@ class Note:
         if item in self.__time:
             return True
 
+        if item in self.__date:
+            return True
+
         if item in self.__people:
             return True
 
@@ -274,3 +298,30 @@ class Note:
             return self == other
 
         return False
+
+
+    def edit(self, field):
+        """
+        Edit specified field
+        """
+        if field == "Subject":
+            self.set_sub()
+        elif field == "Time":
+            self.set_time()
+        elif field == "Date":
+            self.set_date()
+        elif field == "Location":
+            self.set_location()
+        elif field == "People":
+            self.set_people()
+        elif field == "Items":
+            self.set_items()
+        else:
+            self.set_additional()
+
+
+    def make_list(self):
+        """
+        Return formated list version of note
+        """
+        return ["Subject: " + self.__sub, "Time: " + self.__time, "Date: " + self.__date, "Location: " + self.__location, "People: " + self.__people, "Items: " + self.__items, "Additional Information: " + self.__additional]
