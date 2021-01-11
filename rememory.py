@@ -268,17 +268,43 @@ class Notebook(node_queue.Queue):
 # Main function, utilize sys to gather and process args/opts
 def main():
     """
-    Currently using for manual tests
-    """
+    Main, processes user arguments from command line
 
     # After init implimentation w/ file storage, look into mysql storage adaption?
+    """
 
-    # try
+    # initialize notebook
+    n = Notebook()
+    n.fill()
+
+    try:
         # verify sys.argv[1] is an option
-        # get the argument for the option: sys.argv[2]
-        # execuite the function/method with respect to the option
-    # except, handel errors - raise errors when possible
+        argv = sys.argv[1]
+        if argv[0] == "-":
+            # run method with respect to option
+            if argv == "-a":
+                n.add()
+            elif argv == "-u":
+                n.update()
+            elif argv == "-d":
+                n.delete()
+            elif argv == "-r":
+                n.read()
+            else:
+                raise ValueError("\'" + argv + "\'" + " is not a valid option!")
 
+        else:
+            raise ValueError("\'" + argv + "\'" + " is not a valid option!\nMust include a '-' (dash) at front.")
+
+    # handel errors - raise errors when possible
+    except ValueError as ve:
+        print(ve)
+        
+    except TypeError as te:
+        print(te)
+
+    except IndexError:
+        print("Please provide an option!")
 
     
 
