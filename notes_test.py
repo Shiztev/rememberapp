@@ -111,9 +111,8 @@ def test_gt(monkeypatch):
     n3.create_note()
 
     # analyze
-    assert n1 < n2
-    assert n3 > n2
-
+    assert n2 > n1
+    assert n3 > n2  # NEED TO MODIFY COMPARATORS, DON'T PROPERLY HANDEL WHEN DATE IS MISSING
 
 
 
