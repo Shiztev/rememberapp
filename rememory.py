@@ -14,7 +14,7 @@ import getopt  # parse arguments from command line input
 
 FILENAME = "notebook"  # standardized storage filename 
 ATTRIBUTES = ["Subject", "Time", "Date", "Location", "People", "Items", "Additional Information"]
-METHOD_QS = ["Which note would you like to edit?", "Which note would you like to delete?"]
+METHOD_QS = ["Which note would you like to edit?", "Which note would you like to delete?", "Current notes in notebook...."]
 
 class Notebook(node_queue.Queue):
     '''
@@ -28,12 +28,17 @@ class Notebook(node_queue.Queue):
         super().__init__()  # Parent class init
 
 
-    def __order(self):
+    def __str__(self):
         """
-        Order queue with respect to note comparators  
-        # NEED TO IMPLIMENT NOTE COMPARATORS FIRST, BASED OFF TIME/DATE(?)
+        String version of notebook
         """
-        pass # <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+        s = ""
+        for i in range(self.size()):
+            _ = self.dequeue()
+            s += str(_) + "\n"
+            self.enqueue(_)
+        
+        return s
 
 
     def fill(self, filename=FILENAME):
@@ -51,7 +56,7 @@ class Notebook(node_queue.Queue):
                 self.enqueue(n)
 
 
-    def new_note(self):
+    def __new_note(self):
         """
         Make a new note and enqueue it
         """
@@ -166,19 +171,27 @@ class Notebook(node_queue.Queue):
         return _
 
 
-    def __append(self):
+    def __append(self):  # <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
         """
-        Save notes to end of file, 
-
-            Option:
-                -a
+        Save notes to end of file
         """
         # single update implimentation
         with open(FILENAME, "a") as f:  # append to storage file
             f.write(repr(self.dequeue()))
 
+
+    def add(self):
+        """
+        Create and add a note
+
+            Option:
+                -a
+        """
+        self.__new_note()
+
+
     
-    def update(self):  # IMPLIMENT and privitize<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+    def update(self): 
         """
         Save an updated version of a note, utilizes inquirer for note selection
 
@@ -201,11 +214,21 @@ class Notebook(node_queue.Queue):
         self.__search(self.__remove, METHOD_QS[1])
 
 
-    def __read(self):
+    def __read_note(self, a_note):
+        """
+        Display a note
+        """
+        print(a_note)
+
+
+    def read(self):
         """
         Display notes
+
+            Option:
+                -r
         """
-        pass
+        self.__search(self.__read_note, METHOD_QS[2])
         
 
 
@@ -219,6 +242,15 @@ class Notebook(node_queue.Queue):
                 -s  # maybe don't have an option to save and just do automatically?
         """
         pass
+
+
+    def __order(self):
+            """
+            Order queue with respect to note comparators  
+            # NEED TO IMPLIMENT NOTE COMPARATORS FIRST, BASED OFF TIME/DATE(?)
+            """
+            pass 
+
 
 
     
@@ -247,11 +279,6 @@ def main():
         # execuite the function/method with respect to the option
     # except, handel errors - raise errors when possible
 
-    
-    n = Notebook()
-    n.fill()
-    n.update()
-    n.delete()
 
     
 
