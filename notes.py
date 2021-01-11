@@ -13,6 +13,7 @@ from datetime import datetime  # https://www.programiz.com/python-programming/da
 FIELDS = ["Subject", "Time", "Date", "Location", "People", "Items", "Additional Information"]
 MONTHS = ["January", "Febuary", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"]
 
+
 def _date_parser(date):
     """
     Parses date and ensures numerical values are used for proportional measuring
