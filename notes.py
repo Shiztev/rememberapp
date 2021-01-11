@@ -8,6 +8,7 @@ Note object module
 import time  # https://www.programiz.com/python-programming/datetime/current-time
 from datetime import datetime  # https://www.programiz.com/python-programming/datetime/current-datetime
 # use to order notes based on relevence to current time
+import warnings
 
 
 FIELDS = ["Subject", "Time", "Date", "Location", "People", "Items", "Additional Information"]
@@ -240,9 +241,9 @@ class Note:
         if type(a_sub) != str:
             raise ValueError("Subject must be described in text!")
         elif len(a_sub) > 15:
-            raise Warning("Subject text is long, this may affect legibility note.")
-        else:
-            self.__sub = a_sub
+            print("\033[1m\nFutureWarning: Subject text is long, this may affect legibility note.\n\033[0m")
+        
+        self.__sub = a_sub
 
     
     def set_time(self, a_time=None):
