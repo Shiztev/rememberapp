@@ -5,6 +5,11 @@ Note object module
 '''
 
 
+import time  # https://www.programiz.com/python-programming/datetime/current-time
+from datetime import datetime  # https://www.programiz.com/python-programming/datetime/current-datetime
+# use to order notes based on relevence to current time
+
+
 FIELDS = ["Subject", "Time", "Date", "Location", "People", "Items", "Additional Information"]
 MONTHS = ["January", "Febuary", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"]
 
@@ -44,7 +49,7 @@ def _date_parser(date):
             if date[0] in MONTHS[i]:
                 m = i + 1
 
-    return [str(m), str(d), str(y)]
+    return [int(m), int(d), int(y)]
 
 
 class Time:
@@ -329,7 +334,7 @@ class Note:
         """
         String
         """
-        return "Subject: " + self.__sub + "\n\tTime: " + self.__time + "\n\tDate: " + self.__date + "\n\tLocation: " + self.__location + "\n\tPeople: " + self.__people + "\n\tItems: " + self.__items + "\n\tAdditional: " + self.__additional
+        return "Subject: " + self.__sub + "\n\tTime: " + self.__time + "\n\tDate: " + self.__date + "\n\tLocation: " + self.__location + "\n\tPeople: " + self.__people + "\n\tItems: " + self.__items + "\n\tAdditional: " + self.__additional + "\n"
 
 
     def __fill(self, sub, time, date, loc, people, items, addit):
@@ -415,17 +420,18 @@ class Note:
 
     def __eq__(self, other):
         """
-        Returns equal comparison bool
+        Returns equal comparison bool, if items are completely identical
         """
         if type(self) == type(other):
-            return (_date_parser(self.__date) == _date_parser(other.get_date())) and (self.__time == other.get_time())
+            return self.__sub == other.get_sub() and self.__date == other.get_date() and self.__location == other.get_location() and self.__people == other.get_people() and self.__items == other.get_items() and self.__additional == other.get_additional()
                 
         return False
 
+# NEED TO MODIFY COMPARATORS, DON'T PROPERLY HANDEL WHEN DATE IS MISSING <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
     def __lt__(self, other):
         """
-        Returns less than comparison bool
+        Returns less than comparison bool, with respect to time and date
         """
         if type(self) == type(other):
             sd = _date_parser(self.__date)
@@ -434,13 +440,18 @@ class Note:
             if sd == od:
                 st = Time(self.__time)
                 ot = Time(other.get_time())
+                print("dates are equal")
+                print(st, "<?", ot)
                 return st < ot
             
             # RETURN BASED ON YEAR, MONTH, DATE
             elif sd[2] == od[2]:
-                elif sd[1] == od[1]:
-                    return sd[0] < od[0]
-                return sd[1] < od[1]
+                if sd[1] == od[1]:
+                    print("comparing days")
+                    return sd[1] < od[1]
+                print("comparing months")
+                return sd[0] < od[0]
+            print("comparing years")
             return sd[2] < od[2]
 
         return False
@@ -448,7 +459,7 @@ class Note:
 
     def __gt__(self, other):
         """
-        Returns greater than comparison bool
+        Returns greater than comparison bool, with respect to time and date
         """
         if type(self) == type(other):
             sd = _date_parser(self.__date)
@@ -456,14 +467,19 @@ class Note:
 
             if sd == od:
                 st = Time(self.__time)
-                ot = Time(other.get_time())
+                ot = Time(other.get_time()) # ANALYZE AND VERIFY TIME COMPARE<<<<<<<<<<<<<<<<<<<<<<<
+                print("dates are equal")
+                print(st, ">?", ot)
                 return st > ot
             
             # RETURN BASED ON YEAR, MONTH, DATE
             elif sd[2] == od[2]:
-                elif sd[1] == od[1]:
-                    return sd[0] > od[0]
-                return sd[1] > od[1]
+                if sd[1] == od[1]:
+                    print("comparing days")
+                    return sd[1] > od[1]
+                print("comparing months")
+                return sd[0] > od[0]
+            print("comparing years")
             return sd[2] > od[2]
 
         return False
