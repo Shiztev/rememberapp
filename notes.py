@@ -5,14 +5,26 @@ Note object module
 '''
 
 
-import time  # https://www.programiz.com/python-programming/datetime/current-time
-from datetime import datetime  # https://www.programiz.com/python-programming/datetime/current-datetime
-# use to order notes based on relevence to current time
+from remtime import *
 import warnings
 
 
 FIELDS = ["Subject", "Time", "Date", "Location", "People", "Items", "Additional Information"]
 MONTHS = ["January", "Febuary", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"]
+
+
+def greater_than(a, b):
+    if type(a) == type(b):
+        return a > b
+    else:
+        raise TypeError
+
+
+def less_than(a, b):
+    if type(a) == type(b):
+        return a < b
+    else:
+        raise TypeError
 
 
 def _date_parser(date):
@@ -24,7 +36,7 @@ def _date_parser(date):
     """
     date = date.strip()
     if date == "":
-        return [0, 0, 0]
+        return [None, None, None]
     elif "/" in date:
         date = date.split("/")
     elif ", " in date:
@@ -54,83 +66,28 @@ def _date_parser(date):
     return [int(m), int(d), int(y)]
 
 
-class Time:
-    '''
-    Time class, ease of sorting notes
-    '''
-    __slots__ = ['__time', '__m', '__hour', '__minutes']
-    def __init__(self, a_time):
-        """
-        Constructor
-        """
-        self.__time = a_time
-        if a_time.strip() == "":
-            self.__m = None
-            self.__hour = None
-            self.__minutes = None
-        else:
-            m = a_time[-2:len(a_time)]  # am/pm
-            if m == "am":
-                m = 0
-            elif m == "pm":
-                m = 1
-            else:
-                raise ValueError("Improper time format! Neither AM nor PM was specified.")
-            a_time = a_time.strip().split(":")
-            self.__hour = int(a_time[0])
-            self.__minutes = int(a_time[1][:2])
+def _date_diff(date_list):
+    """
+    Determines the difference between the current date and provided parsed date
 
+        Parameters:
+            date_list: parsed list from _date_parser in m, d, y format
 
-    def get_m(self):
-        return self.__m
-
-    
-    def get_hour(self):
-        return self.__hour
-
-
-    def get_min(self):
-        return self.__minutes
-
-
-    def __lt__(self, other):
-        """
-        """
-        if type(self) == type(other):
-            if self.__m == other.get_m():
-                if self.__hour == other.get_hour():
-                    return self.__minutes < other.get_min()
-                return self.__hour < other.get_hour()
-
-            elif other.get_m() == None:
-                return False
-
-            elif self.__m == None:
-                return True
-
-            return self.__m < other.get_m()
-
-        return False
-
-
-    def __gt__(self, other):
-        """
-        """
-        if type(self) == type(other):
-            if self.__m == other.get_m():
-                if self.__hour == other.get_hour():
-                    return self.__minutes > other.get_min()
-                return self.__hour > other.get_hour()
-
-            elif other.get_m() == None:
-                return True
-
-            elif self.__m == None:
-                return False
-
-            return self.__m > other.get_m()
-
-        return False
+        Returns:
+            formated m, d, y list of difference between param and current date
+    """
+    if date_list == [None, None, None]:
+        return date_list
+    current_time = datetime.datetime.now()
+    y = date_list[2] 
+    m = date_list[0] 
+    d = date_list[1] 
+    y -= current_time.year
+    if y < 1:
+        m -= current_time.month
+        if m < 1:
+            d -= current_time.day
+    return [m, d, y]
 
 
 class NoteIterator:
@@ -415,6 +372,14 @@ class Note:
         return NoteIterator(self)
 
 
+    def __time_compare(self, other, comparitor):
+        """
+        """
+        st = Time(self.__time)
+        ot = Time(other.get_time())
+        return comparitor(st, ot)
+
+
     """
     Bool comparisons done with respect to time and date. Notes ranked 
     based on time of occurance
@@ -431,57 +396,72 @@ class Note:
 
 # NEED TO MODIFY COMPARATORS, DON'T PROPERLY HANDEL WHEN DATE IS MISSING <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
-    def __lt__(self, other):
+# 'Rank' notes based on how long until time is reached - longer time < shorter time, with respect to current time
+
+    def __gt__(self, other):
         """
-        Returns less than comparison bool, with respect to time and date
+        Returns less than comparison bool, with respect to current time and date
         """
         if type(self) == type(other):
-            sd = _date_parser(self.__date)
-            od = _date_parser(other.get_date())
+            sd = _date_diff(_date_parser(self.__date))
+            od = _date_diff(_date_parser(other.get_date()))
 
-            if sd == od:
-                st = Time(self.__time)
-                ot = Time(other.get_time())
-                print("dates are equal")
-                print(st, "<?", ot)
-                return st < ot
+            # check to see if date is present
+            if sd == [None, None, None]:
+                return True
             
+            elif od == [None, None, None]:
+                return False
+
+            # check to see if date has passed
+            elif sd[2] < 0 or sd[1] < 0 or sd[0] < 0:
+                return True
+            elif od[2] < 0 or od[1] < 0 or od[0] < 0:
+                return False
+
+            # same dates
+            elif sd == od:
+                return self.__time_compare(other, less_than)
+
             # RETURN BASED ON YEAR, MONTH, DATE
             elif sd[2] == od[2]:
-                if sd[1] == od[1]:
-                    print("comparing days")
+                if sd[0] == od[0]:
                     return sd[1] < od[1]
-                print("comparing months")
                 return sd[0] < od[0]
-            print("comparing years")
             return sd[2] < od[2]
 
         return False
 
 
-    def __gt__(self, other):
+    def __lt__(self, other):
         """
-        Returns greater than comparison bool, with respect to time and date
+        Returns greater than comparison bool, with respect to current time and date
+        If primary note's date is closer than other note's date, other > primary
         """
         if type(self) == type(other):
-            sd = _date_parser(self.__date)
-            od = _date_parser(other.get_date())
+            sd = _date_diff(_date_parser(self.__date))
+            od = _date_diff(_date_parser(other.get_date()))
 
-            if sd == od:
-                st = Time(self.__time)
-                ot = Time(other.get_time()) # ANALYZE AND VERIFY TIME COMPARE<<<<<<<<<<<<<<<<<<<<<<<
-                print("dates are equal")
-                print(st, ">?", ot)
-                return st > ot
+            # check to see if date is present
+            if sd == [None, None, None]:
+                return False
+            
+            elif od == [None, None, None]:
+                return True
+
+            # check to see if date has passed
+            elif sd[2] < 0 or sd[1] < 0 or sd[0] < 0:
+                return False
+            elif od[2] < 0 or od[1] < 0 or od[0] < 0:
+                return True
             
             # RETURN BASED ON YEAR, MONTH, DATE
             elif sd[2] == od[2]:
-                if sd[1] == od[1]:
-                    print("comparing days")
+                if sd[0] == od[0]:
+                    if sd[1] == od[1]:
+                        return self.__time_compare(other, greater_than)
                     return sd[1] > od[1]
-                print("comparing months")
                 return sd[0] > od[0]
-            print("comparing years")
             return sd[2] > od[2]
 
         return False
