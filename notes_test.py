@@ -6,7 +6,8 @@ Test module for notes
 
 
 import notes
-import rememory
+import notebook
+import remtime
 import io
 
 def test_contain():
@@ -32,11 +33,13 @@ def test_contain():
     assert actual_2 == True
 
 
+# OBSOLETE TEST - privitized new_note method
+'''
 def test_create(monkeypatch):
     """
     """
     # setup
-    book = rememory.Notebook()
+    book = notebook.Notebook()
     monkeypatch.setattr('sys.stdin', io.StringIO("This\nIs\nA\nTest\nThe last field\nWill be blank\n \n"))
     expected = "Subject: " + "This" + "\n\tTime: " + "Is" + "\n\tDate: " + "A" + "\n\tLocation: " + "Test" + "\n\tPeople: " + "The last field" + "\n\tItems: " + "Will be blank" + "\n\tAdditional:  "
 
@@ -46,6 +49,7 @@ def test_create(monkeypatch):
 
     # analyze
     assert expected == actual
+'''
 
 
 def test_type():
@@ -86,15 +90,15 @@ def test_lt(monkeypatch):
     n1 = notes.Note()
     n2 = notes.Note()
     n3 = notes.Note()
-    monkeypatch.setattr('sys.stdin', io.StringIO("Test Pass\n2:00pm\n1/1/2005\n\n\nSome Stuff\n\nTest Pass\n2:00pm\n1/1/2005\n\n\nSome Stuff\n\nTest Fail\n3:00pm\n\nSomewhere\n\nSome Stuff\n\n"))
+    monkeypatch.setattr('sys.stdin', io.StringIO("Test 1\n2:00pm\n7/8/2030\n\n\nSome Stuff\n\nTest 2\n2:00pm\n1/1/2022\n\n\nSome Stuff\n\nTest 3\n3:00pm\n\nSomewhere\n\nSome Stuff\n\n"))
     # invoke
     n1.create_note()
     n2.create_note()
     n3.create_note()
 
     # analyze
-    assert n1 == n2
-    assert n1 != n3
+    assert n1 < n2  # 2pm @ 7/8/2030 < 2pm @ 1/1/2022
+    assert n2 < n3  # 2pm @ 1/1/2022 < 3pm
 
 
 def test_gt(monkeypatch):
@@ -104,18 +108,14 @@ def test_gt(monkeypatch):
     n1 = notes.Note()
     n2 = notes.Note()
     n3 = notes.Note()
-    monkeypatch.setattr('sys.stdin', io.StringIO("Test 1\n2:00pm\n1/2/2005\n\n\nSome Stuff\n\nTest 2\n2:00pm\n1/1/2005\n\n\nSome Stuff\n\nTest 3\n3:00pm\n\nSomewhere\n\nSome Stuff\n\n"))
+    monkeypatch.setattr('sys.stdin', io.StringIO("Test 1\n2:00pm\n1/2/2022\n\n\nSome Stuff\n\nTest 2\n2:00pm\n1/1/2023\n\n\nSome Stuff\n\nTest 3\n3:00pm\n\nSomewhere\n\nSome Stuff\n\n"))
     # invoke
     n1.create_note()
     n2.create_note()
     n3.create_note()
 
     # analyze
-    assert n2 > n1
-    assert n3 > n2  # NEED TO MODIFY COMPARATORS, DON'T PROPERLY HANDEL WHEN DATE IS MISSING
-
-
-
-
+    assert n1 > n2  # 2pm @ 1/2/2022 > 2pm @ 1/1/2023
+    assert n3 > n2  # 3pm > 2pm @ 1/1/2023
 
 # 0 - Subject, 1 - Time, 2 - Date, 3 - Location, 4 - People, 5 - Items, 6 - Additional
