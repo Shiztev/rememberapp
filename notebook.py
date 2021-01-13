@@ -226,6 +226,8 @@ class Notebook(node_queue.Queue):
             Option:
                 -r
         """
+        # change so that notebook is ordered before reading
+        self.__order()
         self.__search(self.__read_note, METHOD_QS[2])
         
 
@@ -242,12 +244,25 @@ class Notebook(node_queue.Queue):
         pass
 
 
+    def __make_list(self):
+        """
+        Dequeues and turns notebook into unordered list
+        """
+        l = []
+        while not self.is_empty():
+            l.append(self.dequeue())
+
+        return l
+
+
     def __order(self):
             """
             Order queue with respect to note comparators  
             # NEED TO IMPLIMENT NOTE COMPARATORS FIRST, BASED OFF TIME/DATE(?)
             """
-            pass 
+            l = self.__make_list()
+            
+            
 
 
 
