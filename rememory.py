@@ -6,7 +6,7 @@ can make a note in just a few seconds.
 @author Stevie Alvarez
 '''
 
-from notes import *  # create standardized note
+
 from notebook import *  # create notebook - queue of notes
 import sys  # sys.argv to gather arguments/options from command line
 import getopt  # parse arguments from command line input
