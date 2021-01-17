@@ -72,7 +72,7 @@ def test_eq(monkeypatch):
     n1 = notes.Note()
     n2 = notes.Note()
     n3 = notes.Note()
-    monkeypatch.setattr('sys.stdin', io.StringIO("Test Pass\n2:00pm\n1/1/2005\n\n\nSome Stuff\n\nTest Pass\n2:00pm\n1/1/2005\n\n\nSome Stuff\n\nTest Fail\n3:00pm\n\nSomewhere\n\nSome Stuff\n\n"))
+    monkeypatch.setattr('sys.stdin', io.StringIO("Test Pass\n2:00pm\n1/1/2005\n\n\n\n\nTest Pass\n2:00pm\n1/1/2005\n\n\nSome Stuff\n\nTest Fail\n2:00pm\n\nSomewhere\n\nSome Stuff\n\n"))
     # invoke
     n1.create_note()
     n2.create_note()
@@ -117,5 +117,41 @@ def test_gt(monkeypatch):
     # analyze
     assert n1 > n2  # 2pm @ 1/2/2022 > 2pm @ 1/1/2023
     assert n3 > n2  # 3pm > 2pm @ 1/1/2023
+
+
+def test_ge(monkeypatch):
+    """
+    """
+    # setup
+    n1 = notes.Note()
+    n2 = notes.Note()
+    n3 = notes.Note()
+    monkeypatch.setattr('sys.stdin', io.StringIO("Test 1\n2:00pm\n1/1/2023\n\n\nSome Stuff\n\nTest 2\n2:00pm\n1/1/2023\n\n\nSome Stuff\n\nTest 3\n1:00pm\n1/1/2023\nSomewhere\n\nSome Stuff\n\n"))
+    # invoke
+    n1.create_note()
+    n2.create_note()
+    n3.create_note()
+
+    # analyze
+    assert n1 >= n2  
+    assert n3 >= n2  
+
+
+def test_le(monkeypatch):
+    """
+    """
+    # setup
+    n1 = notes.Note()
+    n2 = notes.Note()
+    n3 = notes.Note()
+    monkeypatch.setattr('sys.stdin', io.StringIO("Test 1\n3:00pm\n1/1/2022\n\n\nSome Stuff\n\nTest 2\n2:00pm\n1/1/2022\n\n\nSome Stuff\n\nTest 3\n2:00pm\n1/1/2022\nSomewhere\n\nSome Stuff\n\n"))
+    # invoke
+    n1.create_note()
+    n2.create_note()
+    n3.create_note()
+
+    # analyze
+    assert n2 <= n3 
+    assert n1 <= n2  
 
 # 0 - Subject, 1 - Time, 2 - Date, 3 - Location, 4 - People, 5 - Items, 6 - Additional
