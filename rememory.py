@@ -36,10 +36,7 @@ def main():
             elif argv == "-d":
                 n.delete()
             elif argv == "-r":
-                try:
-                    n.read()
-                except IndexError as ie:
-                    print(ie)
+                n.read()
 
             else:
                 raise ValueError("\'" + argv + "\'" + " is not a valid option!")
