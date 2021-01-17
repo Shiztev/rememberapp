@@ -230,7 +230,7 @@ class Notebook(node_queue.Queue):
             # NEED TO IMPLIMENT NOTE COMPARATORS FIRST, BASED OFF TIME/DATE(?)
             """
             l = self.__make_list()
-            l = sorted(l)  # Doesn't properly sort....
+            l.sort(reverse=True)  # reverse sets so its high ranking to low ranking
             self.__convert_list(l)
 
 
