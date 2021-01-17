@@ -72,9 +72,7 @@ class Notebook(node_queue.Queue):
                 action: method to use with selected note
                 q: question prompt with respect to action method
         """
-        pass
-        # use content from update method
-
+        front = self.peek()
         moderator = self.size()
         factor = 5
         next_prompt = "Next 5..."
@@ -120,6 +118,11 @@ class Notebook(node_queue.Queue):
         
         i = subjects.index(answers['note'])
         action(options[i])
+
+        # reorder notebook
+        while not top.same(self.peek()):
+            _ = self.dequeue()
+            self.enqueue(_)
 
 
     def __shift(self, a_note):
@@ -227,7 +230,7 @@ class Notebook(node_queue.Queue):
             # NEED TO IMPLIMENT NOTE COMPARATORS FIRST, BASED OFF TIME/DATE(?)
             """
             l = self.__make_list()
-            l.sort()
+            l = sorted(l)  # Doesn't properly sort....
             self.__convert_list(l)
 
 
@@ -246,7 +249,7 @@ class Notebook(node_queue.Queue):
                 -r
         """
         # change so that notebook is ordered before reading
-        self.__order()
+        self.__order() # move to top of __save, once implimented 
         self.__search(self.__read_note, METHOD_QS[2])
 
 
@@ -269,6 +272,7 @@ class Notebook(node_queue.Queue):
                 -s  # maybe don't have an option to save and just do automatically?
         """
         pass
+        # have __order at top(?)
         
 
             
