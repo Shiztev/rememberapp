@@ -159,5 +159,19 @@ def test_le():
     assert n2 <= n3 
     assert n1 <= n2 
 
-#test_le()
+
+def test_order():
+    """
+    """
+    # setup
+    n = notebook.Notebook()
+    n.fill()
+
+    # invoke
+    n.order()
+
+    # analyze
+
+
+test_order()
 # 0 - Subject, 1 - Time, 2 - Date, 3 - Location, 4 - People, 5 - Items, 6 - Additional
