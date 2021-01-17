@@ -7,7 +7,6 @@ Test module for notes
 
 import notes
 import notebook
-import remtime
 import io
 
 def test_contain():
@@ -137,21 +136,28 @@ def test_ge(monkeypatch):
     assert n3 >= n2  
 
 
-def test_le(monkeypatch):
+def test_le():
     """
     """
     # setup
     n1 = notes.Note()
     n2 = notes.Note()
     n3 = notes.Note()
-    monkeypatch.setattr('sys.stdin', io.StringIO("Test 1\n3:00pm\n1/1/2022\n\n\nSome Stuff\n\nTest 2\n2:00pm\n1/1/2022\n\n\nSome Stuff\n\nTest 3\n2:00pm\n1/1/2022\nSomewhere\n\nSome Stuff\n\n"))
+    #monkeypatch.setattr('sys.stdin', io.StringIO("Test 1\n3:00pm\n1/1/2022\n\n\nSome Stuff\n\nTest 2\n2:00pm\n1/1/2022\n\n\nSome Stuff\n\nTest 3\n2:00pm\n1/1/2022\nSomewhere\n\nSome Stuff\n\n"))
     # invoke
-    n1.create_note()
-    n2.create_note()
-    n3.create_note()
+    n1.set_sub("test 1")
+    n1.set_time("3:00pm")
+    n1.set_date("1/1/2022")
+    n2.set_sub("test 2")
+    n2.set_time("2:00pm")
+    n2.set_date("1/1/2022")
+    n3.set_sub("test 3")
+    n3.set_time("2:00pm")
+    n3.set_date("1/1/2022")
 
     # analyze
     assert n2 <= n3 
-    assert n1 <= n2  
+    assert n1 <= n2 
 
+#test_le()
 # 0 - Subject, 1 - Time, 2 - Date, 3 - Location, 4 - People, 5 - Items, 6 - Additional
