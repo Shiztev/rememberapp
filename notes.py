@@ -5,12 +5,19 @@ Note object module
 '''
 
 
-from remtime import *
 import warnings
+import datetime
 
 
 FIELDS = ["Subject", "Time", "Date", "Location", "People", "Items", "Additional Information"]
 MONTHS = ["January", "Febuary", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"]
+
+
+def equal(a, b):
+    if type(a) == type(b):
+        return a == b
+    else:
+        raise TypeError
 
 
 def greater_than(a, b):
@@ -27,6 +34,51 @@ def less_than(a, b):
         raise TypeError
 
 
+def lt_equal(a, b):
+    if type(a) == type(b):
+        return a <= b
+    else:
+        raise TypeError
+
+
+def gt_equal(a, b):
+    if type(a) == type(b):
+        return a >= b
+    else:
+        raise TypeError
+
+
+def _time_total(time):
+    """
+    Get total minutes of time list
+    """
+    total = 0
+    total += time[3] * 60  # hours to minutes
+    total += time[4]  # minutes
+
+    return total
+
+
+def _date_total(date):
+    """
+    Get total minuts of date list
+    """
+    total = 0
+    total += (date[0] - 1950) * 525960  # years to minutes, since 1950, for size reduction
+    total += date[1] * 43830  # months to minutes
+    total += date[2] * 1440  # days to minutes
+
+
+def _standard_time(time_list):
+    """
+    Convert time_list into minutes
+
+        Parameters:
+            time_list: list in [y, m, d, h, min] format
+    """
+    return _time_total(time_list[3:]) + _date_total(time_list[:3])
+    
+
 def _date_parser(date):
     """
     Parses date and ensures numerical values are used for proportional measuring
@@ -34,6 +86,7 @@ def _date_parser(date):
         Parameters:
             date: a date in m/d/y or m, d, y format
     """
+    # date
     date = date.strip()
     if date == "":
         return [None, None, None]
@@ -63,31 +116,63 @@ def _date_parser(date):
             if date[0] in MONTHS[i]:
                 m = i + 1
 
-    return [int(m), int(d), int(y)]
+    return [int(y), int(m), int(d)]
 
 
-def _date_diff(date_list):
+def _time_parser(time):
     """
-    Determines the difference between the current date and provided parsed date
+    Parses time into list
 
         Parameters:
-            date_list: parsed list from _date_parser in m, d, y format
-
-        Returns:
-            formated m, d, y list of difference between param and current date
+            time: a time in h:mm format
     """
-    if date_list == [None, None, None]:
-        return date_list
-    current_time = datetime.datetime.now()
-    y = date_list[2] 
-    m = date_list[0] 
-    d = date_list[1] 
-    y -= current_time.year
-    if y < 1:
-        m -= current_time.month
-        if m < 1:
-            d -= current_time.day
-    return [m, d, y]
+    time = time.strip()
+    hours = 0
+    minutes = 0
+
+    if time[-2:] != "am":
+        hours += 12
+    else:
+        pass
+    
+    time = time[-2:].split(":")
+    try:
+        hours += int(time[0])
+        minutes += int(time[1])
+    except:
+        raise TypeError("Time not numeric!")
+
+    return [hours, minutes]
+
+
+def _time_merge(date, time):
+    """
+    Merge date and time lists, used as a safeguard
+    """
+    if type(date) == list and type(time) == list:
+        return date + time
+
+    else:
+        raise ValueError("Date or time not converted to a list!")
+
+
+def _time_diff(date, time):
+    """
+    Determines the difference between the current date and provided time total
+    """
+    ct = datetime.datetime.now()
+    c = [ct.year, ct.month, ct.day, ct.hour, ct.minute]  # get current time
+
+    if None in date:
+        if None in time:  # if provided time is None, return None
+            return None
+        else:
+            return _time_total(time) # add up time, ignore date, ranks higher
+
+    time = _standard_time(_time_merge(date, time))  # convert to minutes
+    curr_time = _standard_time(c)  # convert current time to minutes
+
+    return time - curr_time
 
 
 class NoteIterator:
@@ -372,97 +457,136 @@ class Note:
         return NoteIterator(self)
 
 
-    def __time_compare(self, other, comparitor):
-        """
-        """
-        st = Time(self.__time)
-        ot = Time(other.get_time())
-        return comparitor(st, ot)
-
-
     """
     Bool comparisons done with respect to time and date. Notes ranked 
     based on time of occurance
     """
 
-    def __eq__(self, other):
+    def same(self, other):
         """
-        Returns equal comparison bool, if items are completely identical
+        Full __eq__ method, determines if items are completely identical
         """
         if type(self) == type(other):
             return self.__sub == other.get_sub() and self.__date == other.get_date() and self.__location == other.get_location() and self.__people == other.get_people() and self.__items == other.get_items() and self.__additional == other.get_additional()
                 
         return False
 
-# NEED TO MODIFY COMPARATORS, DON'T PROPERLY HANDEL WHEN DATE IS MISSING <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
 # 'Rank' notes based on how long until time is reached - longer time < shorter time, with respect to current time
 
-    def __gt__(self, other):
+    def __eq__(self, other):
         """
-        Returns less than comparison bool, with respect to current time and date
+        Returns equal comparison bool, with respect to time
         """
         if type(self) == type(other):
-            sd = _date_diff(_date_parser(self.__date))
-            od = _date_diff(_date_parser(other.get_date()))
+            sd = _time_diff(_date_parser(self.__date), _time_parser(self.__time))
+            od = _time_diff(_date_parser(other.get_date()), _time_parser(other.get_time()))
+            return sd == od
+
+        return False
+
+
+    def __le__(self, other):
+        """
+        Returns less than/equal comparison bool, with respect to current time and date
+        """
+        if type(self) == type(other):
+            sd = _time_diff(_date_parser(self.__date), _time_parser(self.__time))
+            od = _time_diff(_date_parser(other.get_date()), _time_parser(other.get_time()))
 
             # check to see if date is present
-            if sd == [None, None, None]:
-                return True
-            
-            elif od == [None, None, None]:
+            if sd == None:
                 return False
+            
+            elif od == None:
+                return True
 
             # check to see if date has passed
-            elif sd[2] < 0 or sd[1] < 0 or sd[0] < 0:
+            elif sd < 0:
                 return True
-            elif od[2] < 0 or od[1] < 0 or od[0] < 0:
+            elif od < 0:
                 return False
+            
+            return sd >= od  # if date is farther away, ranks lower
 
-            # same dates
-            elif sd == od:
-                return self.__time_compare(other, less_than)
+        return False
 
-            # RETURN BASED ON YEAR, MONTH, DATE
-            elif sd[2] == od[2]:
-                if sd[0] == od[0]:
-                    return sd[1] < od[1]
-                return sd[0] < od[0]
-            return sd[2] < od[2]
+
+    def __ge__(self, other):
+        """
+        Returns greater than/equal comparison bool, with respect to current time and date
+        """
+        if type(self) == type(other):
+            sd = _time_diff(_date_parser(self.__date), _time_parser(self.__time))
+            od = _time_diff(_date_parser(other.get_date()), _time_parser(other.get_time()))
+
+            # check to see if date is present
+            if sd == None:
+                return False
+            
+            elif od == None:
+                return True
+
+            # check to see if date has passed
+            elif sd < 0:
+                return True
+            elif od < 0:
+                return False
+            
+            return sd >= od  # if date is farther away, ranks lower
+
+        return False
+
+
+    def __gt__(self, other):
+        """
+        Returns greater than comparison bool, with respect to current time and date
+        """
+        if type(self) == type(other):
+            sd = _time_diff(_date_parser(self.__date), _time_parser(self.__time))
+            od = _time_diff(_date_parser(other.get_date()), _time_parser(other.get_time()))
+
+            # check to see if date is present
+            if sd == None:
+                return False
+            
+            elif od == None:
+                return True
+
+            # check to see if date has passed
+            elif sd < 0:
+                return True
+            elif od < 0:
+                return False
+            
+            return sd >= od  # if date is farther away, ranks lower
 
         return False
 
 
     def __lt__(self, other):
         """
-        Returns greater than comparison bool, with respect to current time and date
+        Returns less than comparison bool, with respect to current time and date
         If primary note's date is closer than other note's date, other > primary
         """
         if type(self) == type(other):
-            sd = _date_diff(_date_parser(self.__date))
-            od = _date_diff(_date_parser(other.get_date()))
+            sd = _time_diff(_date_parser(self.__date), _time_parser(self.__time))
+            od = _time_diff(_date_parser(other.get_date()), _time_parser(other.get_time()))
 
             # check to see if date is present
-            if sd == [None, None, None]:
+            if sd == None:
                 return False
             
-            elif od == [None, None, None]:
+            elif od == None:
                 return True
 
             # check to see if date has passed
-            elif sd[2] < 0 or sd[1] < 0 or sd[0] < 0:
-                return False
-            elif od[2] < 0 or od[1] < 0 or od[0] < 0:
+            elif sd < 0:
                 return True
+            elif od < 0:
+                return False
             
-            # RETURN BASED ON YEAR, MONTH, DATE
-            elif sd[2] == od[2]:
-                if sd[0] == od[0]:
-                    if sd[1] == od[1]:
-                        return self.__time_compare(other, greater_than)
-                    return sd[1] > od[1]
-                return sd[0] > od[0]
-            return sd[2] > od[2]
+            return sd >= od  # if date is farther away, ranks lower
 
         return False
 
