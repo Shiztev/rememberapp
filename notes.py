@@ -53,8 +53,8 @@ def _time_total(time):
     Get total minutes of time list
     """
     total = 0
-    total += time[3] * 60  # hours to minutes
-    total += time[4]  # minutes
+    total += time[0] * 60  # hours to minutes
+    total += time[1]  # minutes
 
     return total
 
@@ -67,6 +67,7 @@ def _date_total(date):
     total += (date[0] - 1950) * 525960  # years to minutes, since 1950, for size reduction
     total += date[1] * 43830  # months to minutes
     total += date[2] * 1440  # days to minutes
+    return total
 
 
 def _standard_time(time_list):
@@ -129,18 +130,26 @@ def _time_parser(time):
     time = time.strip()
     hours = 0
     minutes = 0
+    if time == "":
+        return [None, None]
 
-    if time[-2:] != "am":
-        hours += 12
+    if time[-2:] == "am":
+        time = time[:-2].split(":")
+
     else:
-        pass
-    
-    time = time[-2:].split(":")
+        hours += 12
+        if time[-2:] != "pm":
+            time = time.split(":")
+        else:
+            time = time[:-2].split(":")
+
     try:
         hours += int(time[0])
         minutes += int(time[1])
-    except:
-        raise TypeError("Time not numeric!")
+    except ValueError:
+        raise ValueError("Time not numeric! Hours: " + time[0] + " Minutes: " + time[1])
+    except IndexError:
+        raise ValueError("Time could not be properly split!")
 
     return [hours, minutes]
 
@@ -308,7 +317,7 @@ class Note:
         if a_date == None:
             a_date = input("Enter new date: ")
             
-        if type(a_dates) != str:
+        if type(a_date) != str:
             raise ValueError("Date must be text!")
         else:
             self.__date = a_date
@@ -529,11 +538,11 @@ class Note:
 
             # check to see if date has passed
             elif sd < 0:
-                return True
-            elif od < 0:
                 return False
+            elif od < 0:
+                return True
             
-            return sd >= od  # if date is farther away, ranks lower
+            return sd <= od  # if date is farther away, ranks lower
 
         return False
 
@@ -555,11 +564,11 @@ class Note:
 
             # check to see if date has passed
             elif sd < 0:
-                return True
-            elif od < 0:
                 return False
+            elif od < 0:
+                return True
             
-            return sd >= od  # if date is farther away, ranks lower
+            return sd < od  # if date is farther away, ranks lower
 
         return False
 
@@ -586,7 +595,7 @@ class Note:
             elif od < 0:
                 return False
             
-            return sd >= od  # if date is farther away, ranks lower
+            return sd > od  # if date is farther away, ranks lower
 
         return False
 
