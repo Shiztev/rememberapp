@@ -5,6 +5,7 @@ Notebook object module
 '''
 
 
+from notes import *  # create standardized note
 import node_queue  # store notes 
 import inquirer  # CLI navigation
 
@@ -125,7 +126,7 @@ class Notebook(node_queue.Queue):
         """
         Shift queue until a_note is at the front
         """
-        while self.peek() != a_note:
+        while not a_note.same(self.peek()):
             _ = self.dequeue()
             self.enqueue(_)
 
@@ -169,15 +170,6 @@ class Notebook(node_queue.Queue):
         return _
 
 
-    def __append(self):  # <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-        """
-        Save notes to end of file
-        """
-        # single update implimentation
-        with open(FILENAME, "a") as f:  # append to storage file
-            f.write(repr(self.dequeue()))
-
-
     def add(self):
         """
         Create and add a note
@@ -186,7 +178,6 @@ class Notebook(node_queue.Queue):
                 -a
         """
         self.__new_note()
-
 
     
     def update(self): 
@@ -199,7 +190,6 @@ class Notebook(node_queue.Queue):
         # dequeue and enqueue front note, display new front
         # user determines if note should be updated
         self.__search(self.__edit, METHOD_QS[0])
-        # USE __search TO DETERMINE, NEED TO PASS METHOD 
             
 
     def delete(self):
@@ -210,38 +200,6 @@ class Notebook(node_queue.Queue):
                 -d
         """
         self.__search(self.__remove, METHOD_QS[1])
-
-
-    def __read_note(self, a_note):
-        """
-        Display a note
-        """
-        print(a_note)
-
-
-    def read(self):
-        """
-        Display notes
-
-            Option:
-                -r
-        """
-        # change so that notebook is ordered before reading
-        self.__order()
-        self.__search(self.__read_note, METHOD_QS[2])
-        
-
-
-    def __save(self):  # APPEND WORKS, NEED OTHERS
-        """
-        Save the current queue of notes to the standard storage file
-
-        UPDATE TO CALL METHODS TO UPDATE NOTES AND APPEND NOTES
-
-            Option(?):
-                -s  # maybe don't have an option to save and just do automatically?
-        """
-        pass
 
 
     def __make_list(self):
@@ -255,13 +213,64 @@ class Notebook(node_queue.Queue):
         return l
 
 
+    def __convert_list(self, l):
+        """
+        Enqueues all items in a list in order
+        """
+        for _ in l:
+            self.enqueue(_)
+
+
     def __order(self):
             """
             Order queue with respect to note comparators  
             # NEED TO IMPLIMENT NOTE COMPARATORS FIRST, BASED OFF TIME/DATE(?)
             """
             l = self.__make_list()
-            
+            l.sort()
+            self.__convert_list(l)
+
+
+    def __read_note(self, a_note):
+        """
+        Display a note
+        """
+        print(str(a_note))
+
+
+    def read(self):
+        """
+        Display notes
+
+            Option:
+                -r
+        """
+        # change so that notebook is ordered before reading
+        self.__order()
+        self.__search(self.__read_note, METHOD_QS[2])
+
+
+    def __append(self):  # <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+        """
+        Save notes to end of file
+        """
+        # single update implimentation
+        with open(FILENAME, "a") as f:  # append to storage file
+            f.write(repr(self.dequeue()))
+        
+
+    def __save(self):  # APPEND WORKS, NEED OTHERS
+        """
+        Save the current queue of notes to the standard storage file
+
+        UPDATE TO CALL METHODS TO UPDATE NOTES AND APPEND NOTES
+
+            Option(?):
+                -s  # maybe don't have an option to save and just do automatically?
+        """
+        pass
+        
+
             
 
 
