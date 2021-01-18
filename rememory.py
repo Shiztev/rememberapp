@@ -10,6 +10,14 @@ can make a note in just a few seconds.
 from notebook import *  # create notebook - queue of notes
 import sys  # sys.argv to gather arguments/options from command line
 import getopt  # parse arguments from command line input
+import atexit  # save on exit
+
+
+def exit_handeler(n):
+    """
+    Delete notebook before ending, deleting initiates save process
+    """
+    del n
 
 
 # Main function, utilize sys to gather and process args/opts
@@ -23,6 +31,8 @@ def main():
     # initialize notebook
     n = Notebook()
     n.fill()
+
+    atexit.register(exit_handeler, n)
 
     try:
         # verify sys.argv[1] is an option
@@ -41,8 +51,11 @@ def main():
             else:
                 raise ValueError("\'" + argv + "\'" + " is not a valid option!")
 
+        # if no option provided, run until user specifies
         else:
-            raise ValueError("\'" + argv + "\'" + " is not a valid option!\nMust include a '-' (dash) at front.")
+            _ = True
+            while _ == True:
+                _ = n.run()
 
     # handel errors - raise errors when possible
     except ValueError as ve:
