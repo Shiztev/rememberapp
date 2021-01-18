@@ -12,7 +12,8 @@ import inquirer  # CLI navigation
 
 FILENAME = "notememory.txt"  # standardized storage filename 
 ATTRIBUTES = ["Subject", "Time", "Date", "Location", "People", "Items", "Additional Information"]
-METHOD_QS = ["Which note would you like to edit?", "Which note would you like to delete?", "Current notes in notebook...."]
+METHOD_QS = ["Which note would you like to edit?", "Which note would you like to delete?", "Current notes in notebook....", "What would you like to do?"]
+OPTS = ["Add a note", "Update a note", "Delete a note", "Read a note", "EXIT"]
 
 
 class Notebook(node_queue.Queue):
@@ -104,7 +105,7 @@ class Notebook(node_queue.Queue):
             answers = inquirer.prompt(questions)
 
             if answers['note'] == "EXIT":
-                return
+                return "EXIT"
 
             elif answers['note'] == "Next 5...":
                 continue
@@ -202,7 +203,9 @@ class Notebook(node_queue.Queue):
             Option:
                 -d
         """
-        self.__search(self.__remove, METHOD_QS[1])
+        _ = None
+        while _ != "EXIT":
+            _ = self.__search(self.__remove, METHOD_QS[1])
 
 
     def __make_list(self):
@@ -248,42 +251,63 @@ class Notebook(node_queue.Queue):
             Option:
                 -r
         """
-        # change so that notebook is ordered before reading
-        self.__order() # move to top of __save, once implimented 
-        self.__search(self.__read_note, METHOD_QS[2])
-
-
-    def __append(self):  # <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-        """
-        Save notes to end of file
-        """
-        # single update implimentation
-        with open(FILENAME, "a") as f:  # append to storage file
-            f.write(repr(self.dequeue()))
+        _ = None
+        while _ != "EXIT":
+            _ = self.__search(self.__read_note, METHOD_QS[2])
         
 
-    def __save(self):  # APPEND WORKS, NEED OTHERS
+    def __del__(self):  # save notebook when object destroyed, destroy when prog done
         """
-        Save the current queue of notes to the standard storage file
-
-        UPDATE TO CALL METHODS TO UPDATE NOTES AND APPEND NOTES
-
-            Option(?):
-                -s  # maybe don't have an option to save and just do automatically?
+        Save the current queue of notes to the standard storage file.
+        Notebook is implicitly destroyed when program finishes, saves 
+        notebook before being deleted.
         """
-        pass
-        # have __order at top(?)
+        # call __del__ when program finishes
+
+        # order the notes
+        self.__order() 
         
+        # save the notes
+        s = ""  # master string to append
+        with open(FILENAME, "w") as f:
+            while not self.is_empty():
+                s += repr(self.dequeue())
+            f.write(s)
 
-            
+
+    def __mode_select(self, mode):
+        """
+        Run designated mode
+        """
+        if mode == OPTS[0]:
+            self.add()  # add
+        elif mode == OPTS[1]:
+            self.update()  # update
+        elif mode == OPTS[2]:
+            self.delete()  # delete
+        elif mode == OPTS[3]:
+            self.read()  # read
 
 
+    def run(self):
+        """
+        Called when no option is provided, give user the option to 
+        select mode to run
+        """
+        prompt = METHOD_QS[3]
+                
+        questions = [
+            inquirer.List(
+                'mode',
+                message=prompt,
+                choices=OPTS)
+        ]
 
-    
+        answers = inquirer.prompt(OPTS)
 
+        if answers['mode'] == "EXIT":
+            return False
 
-# Access note functions - getopt module?
-
-    # 'Read' stored notes: display the notes to review and remember.
-
-        # Order notes by time and date - the sooner, the higher 'ranked' (1/1/01 > 1/2/01)
+        else:
+            self.__mode_select(answers['mode'])
+            return True
